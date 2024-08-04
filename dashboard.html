@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Balances - Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('https://files.123freevectors.com/wp-content/original/121377-light-grey-abstract-texture-background.jpg');
+            background-size: cover; 
+            background-repeat: no-repeat;
+        }
+        .container {
+            text-align: center;
+            color: rgb(13, 12, 12);
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        .account {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .account label {
+            margin-right: 10px;
+        }
+        .account input {
+            width: 150px;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        .account button {
+            background-color: rgb(99, 110, 179);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .transactions {
+            margin-top: 30px;
+        }
+        .transactions table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .transactions th, .transactions td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<script>
+    // Redirect to login page if not logged in
+    if (!localStorage.getItem('isLoggedIn')) {
+        window.location.href = 'login.html';
+    }
+</script>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Finsynch</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="upcoming-bills.html">Upcoming Bills</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="financial-advice.html">Financial Advice</a></li>
+                    <li class="nav-item"><a class="nav-link" href="payment.html">Payment</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 style="padding-bottom: 3rem;">Account Balances</h1>
+        <form id="balanceForm">
+            <div class="account">
+                <b><label for="spendingsAccount">Spendings Account:</label></b>
+                <input type="number" id="spendingsAccount" value="1200.50" >
+                <button type="button" onclick="removeAccount('spendings')">Remove</button>
+            </div>
+            <div class="account">
+                <b><label for="savingsAccount">Savings Account:</label></b>
+                <input type="number" id="savingsAccount" value="5400.75" >
+                <button type="button" onclick="removeAccount('savings')">Remove</button>
+            </div>
+            <div class="account">
+                <b><label for="investmentAccount">Investment Account:</label></b>
+                <input type="number" id="investmentAccount" value="10500.00" >
+                <button type="button" onclick="removeAccount('investment')">Remove</button>
+            </div>
+            <div id="additionalAccountsContainer"></div>
+            <button type="button" onclick="saveChanges()">Save Changes</button>
+            <button type="button" onclick="window.location.href='add-account.html'">Add Account</button>
+        </form>
+        <div class="transactions">
+            <h2>Transaction History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Account</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Transaction Type</th> <!-- Added Transaction Type Column -->
+                    </tr>
+                </thead>
+                <tbody id="transactionHistory"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        // Retrieve balances from local storage or set default values
+        function getBalances() {
+            return {
+                spendings: parseFloat(localStorage.getItem('spendingsAccount')) || 1200.50,
+                savings: parseFloat(localStorage.getItem('savingsAccount')) || 5400.75,
+                investment: parseFloat(localStorage.getItem('investmentAccount')) || 10500.00,
+                additional: JSON.parse(localStorage.getItem('additionalAccounts')) || []
+            };
+        }
+
+        // Save balances to local storage
+        function saveBalances(balances) {
+            localStorage.setItem('spendingsAccount', balances.spendings);
+            localStorage.setItem('savingsAccount', balances.savings);
+            localStorage.setItem('investmentAccount', balances.investment);
+            localStorage.setItem('additionalAccounts', JSON.stringify(balances.additional));
+        }
+
+        // Load balances into the dashboard
+        function loadBalances() {
+            const balances = getBalances();
+            document.getElementById('spendingsAccount').value = balances.spendings.toFixed(2);
+            document.getElementById('savingsAccount').value = balances.savings.toFixed(2);
+            document.getElementById('investmentAccount').value = balances.investment.toFixed(2);
+            loadAdditionalAccounts();
+        }
+
+        // Save changes made to the balances manually (for testing purposes)
+        function saveChanges() {
+            const balances = {
+                spendings: parseFloat(document.getElementById('spendingsAccount').value),
+                savings: parseFloat(document.getElementById('savingsAccount').value),
+                investment: parseFloat(document.getElementById('investmentAccount').value),
+                additional: []
+            };
+
+            const additionalAccountsContainer = document.getElementById('additionalAccountsContainer');
+            const additionalAccounts = additionalAccountsContainer.querySelectorAll('.account');
+            additionalAccounts.forEach(account => {
+                const accountName = account.querySelector('label').innerText.replace(':', '');
+                const accountBalance = parseFloat(account.querySelector('input').value);
+                balances.additional.push({ name: accountName, balance: accountBalance });
+            });
+
+            saveBalances(balances);
+            alert('Balances saved successfully!');
+        }
+
+        // Load transactions into the dashboard
+        function loadTransactions() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const transactionHistory = document.getElementById('transactionHistory');
+            transactionHistory.innerHTML = '';
+
+            transactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(transaction.date).toLocaleString()}</td>
+                    <td>${transaction.account}</td>
+                    <td>${transaction.amount.toFixed(2)}</td>
+                    <td>${transaction.method}</td>
+                    <td>${transaction.transactionType}</td> <!-- Display Transaction Type -->
+                `;
+                transactionHistory.appendChild(row);
+            });
+        }
+
+        // Remove account
+        function removeAccount(accountType) {
+            if (accountType === 'spendings') {
+                localStorage.removeItem('spendingsAccount');
+            } else if (accountType === 'savings') {
+                localStorage.removeItem('savingsAccount');
+            } else if (accountType === 'investment') {
+                localStorage.removeItem('investmentAccount');
+            } else {
+                const additionalAccounts = JSON.parse(localStorage.getItem('additionalAccounts')) || [];
+                const updatedAccounts = additionalAccounts.filter(account => account.name !== accountType);
+                localStorage.setItem('additionalAccounts', JSON.stringify(updatedAccounts));
+            }
+            window.location.reload();
+        }
+
+        // Load additional accounts into the dashboard
+        function loadAdditionalAccounts() {
+            const additionalAccounts = JSON.parse(localStorage.getItem('additionalAccounts')) || [];
+            const container = document.getElementById('additionalAccountsContainer');
+            container.innerHTML = '';
+            
+            additionalAccounts.forEach(account => {
+                const accountDiv = document.createElement('div');
+                accountDiv.className = 'account';
+                accountDiv.innerHTML = `
+                    <b><label for="${account.name}">${account.name}:</label></b>
+                    <input type="number" id="${account.name}" value="${account.balance.toFixed(2)}">
+                    <button type="button" onclick="removeAccount('${account.name}')">Remove</button>
+                `;
+                container.appendChild(accountDiv);
+            });
+        }
+
+        window.onload = function() {
+            loadBalances();
+            loadTransactions();
+        }
+    </script>
+</body>
+</html>
