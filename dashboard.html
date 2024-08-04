@@ -99,11 +99,6 @@
                 <input type="number" id="savingsAccount" value="5400.75" >
                 <button type="button" onclick="removeAccount('savings')">Remove</button>
             </div>
-            <div class="account">
-                <b><label for="investmentAccount">Investment Account:</label></b>
-                <input type="number" id="investmentAccount" value="10500.00" >
-                <button type="button" onclick="removeAccount('investment')">Remove</button>
-            </div>
             <div id="additionalAccountsContainer"></div>
             <button type="button" onclick="saveChanges()">Save Changes</button>
             <button type="button" onclick="window.location.href='add-account.html'">Add Account</button>
@@ -130,7 +125,6 @@
             return {
                 spendings: parseFloat(localStorage.getItem('spendingsAccount')) || 1200.50,
                 savings: parseFloat(localStorage.getItem('savingsAccount')) || 5400.75,
-                investment: parseFloat(localStorage.getItem('investmentAccount')) || 10500.00,
                 additional: JSON.parse(localStorage.getItem('additionalAccounts')) || []
             };
         }
@@ -139,7 +133,6 @@
         function saveBalances(balances) {
             localStorage.setItem('spendingsAccount', balances.spendings);
             localStorage.setItem('savingsAccount', balances.savings);
-            localStorage.setItem('investmentAccount', balances.investment);
             localStorage.setItem('additionalAccounts', JSON.stringify(balances.additional));
         }
 
@@ -148,7 +141,6 @@
             const balances = getBalances();
             document.getElementById('spendingsAccount').value = balances.spendings.toFixed(2);
             document.getElementById('savingsAccount').value = balances.savings.toFixed(2);
-            document.getElementById('investmentAccount').value = balances.investment.toFixed(2);
             loadAdditionalAccounts();
         }
 
@@ -157,7 +149,6 @@
             const balances = {
                 spendings: parseFloat(document.getElementById('spendingsAccount').value),
                 savings: parseFloat(document.getElementById('savingsAccount').value),
-                investment: parseFloat(document.getElementById('investmentAccount').value),
                 additional: []
             };
 
@@ -198,8 +189,6 @@
                 localStorage.removeItem('spendingsAccount');
             } else if (accountType === 'savings') {
                 localStorage.removeItem('savingsAccount');
-            } else if (accountType === 'investment') {
-                localStorage.removeItem('investmentAccount');
             } else {
                 const additionalAccounts = JSON.parse(localStorage.getItem('additionalAccounts')) || [];
                 const updatedAccounts = additionalAccounts.filter(account => account.name !== accountType);
